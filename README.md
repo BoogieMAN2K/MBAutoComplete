@@ -3,6 +3,7 @@
 
 ![Example](https://github.com/MarcBruins/MBAutoComplete/blob/master/images/example_image.png)
 
+<strong>This is based on MarcBruins work but now is requires MvvmCross and can handle custom objects. Just a starting point more work will follow when I have the time.</strong>
 
 Note that library is not an out of the box solution that looks perfectly on everything. It has some default behaviour which you can use to setup an autocomplete field really quick if that is what you want. But the nice thing about this library is that it is completely customizable.
 
