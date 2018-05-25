@@ -4,6 +4,8 @@ using System.Threading.Tasks;
 using Cirrious.FluentLayouts.Touch;
 using CoreGraphics;
 using Foundation;
+using MvvmCross.Core.ViewModels;
+using Tackzee.PlatformShare.Core.Models;
 using UIKit;
 
 namespace MBAutoComplete
@@ -16,9 +18,9 @@ namespace MBAutoComplete
 			get;
 			set;
 		} = new NoSortingAlghorithm();
-
-		private MBAutoCompleteViewSource _autoCompleteViewSource;
-		public MBAutoCompleteViewSource AutoCompleteViewSource
+        
+		private MBAutoCompleteViewSource<IMvxNotifyPropertyChanged> _autoCompleteViewSource;
+		public MBAutoCompleteViewSource<IMvxNotifyPropertyChanged> AutoCompleteViewSource
 		{
 			get { return _autoCompleteViewSource; }
 			set {
@@ -28,14 +30,14 @@ namespace MBAutoComplete
 					AutoCompleteTableView.Source = this.AutoCompleteViewSource;
 			}
 		}
-
+        
 		public UITableView AutoCompleteTableView
 		{
 			get;
 			private set;
 		}
 
-		public IDataFetcher DataFetcher
+		public IDataFetcher<IMvxNotifyPropertyChanged> DataFetcher
 		{
 			get;
 			set;
@@ -63,16 +65,16 @@ namespace MBAutoComplete
 		private bool _parentTableViewAllowsSelection = false;
 
 		public MBAutoCompleteTextField(IntPtr ptr) : base(ptr){}
-
-		public void Setup(UIViewController view, IList<string> suggestions)
+        
+		public void Setup(UIViewController view, IList<IMvxNotifyPropertyChanged> suggestions)
 		{
 			_parentViewController = view;
-			DataFetcher  = new DefaultDataFetcher(suggestions);
+			DataFetcher  = new DefaultDataFetcher<IMvxNotifyPropertyChanged>(suggestions);
 			AutoCompleteViewSource = new DefaultDataSource();
 			initialize();
 		}
-
-		public void Setup(UIViewController view, IDataFetcher fetcher)
+        
+		public void Setup(UIViewController view, IDataFetcher<IMvxNotifyPropertyChanged> fetcher)
 		{
 			_parentViewController = view;
 			DataFetcher = fetcher;
@@ -80,13 +82,13 @@ namespace MBAutoComplete
 			initialize();
 		}
 
-		public void Setup(UIViewController view, IList<string> suggestions, UITableViewController tableViewController)
+		public void Setup(UIViewController view, IList<IMvxNotifyPropertyChanged> suggestions, UITableViewController tableViewController)
 		{
 			_parentTableViewController = tableViewController;
 			Setup(view, suggestions);
 		}
 
-		public void Setup(UIViewController view, IDataFetcher fetcher, UITableViewController tableViewController)
+		public void Setup(UIViewController view, IDataFetcher<IMvxNotifyPropertyChanged> fetcher, UITableViewController tableViewController)
 		{
 			_parentTableViewController = tableViewController;
 			Setup(view, fetcher);
@@ -165,6 +167,11 @@ namespace MBAutoComplete
 					showAutoCompleteView();
 					await UpdateTableViewData();
 				}
+
+                if (this.Text.Length == 0)
+                {
+                    hideAutoCompleteView();
+                }
 			};
 
 			this.EditingDidEnd += (sender, eventargs) =>
@@ -200,10 +207,9 @@ namespace MBAutoComplete
 
 		public async Task UpdateTableViewData()
 		{
-			await DataFetcher.PerformFetch(this, delegate (ICollection<string> unsortedData)
+			await DataFetcher.PerformFetch(this, delegate (ICollection<IMvxNotifyPropertyChanged> unsortedData)
 			{
-				var sorted = this.SortingAlghorithm.DoSort(this.Text, unsortedData);
-				this.AutoCompleteViewSource.Suggestions = sorted;
+				this.AutoCompleteViewSource.Suggestions = unsortedData;
 
 				AutoCompleteTableView.ReloadData();
 			}
