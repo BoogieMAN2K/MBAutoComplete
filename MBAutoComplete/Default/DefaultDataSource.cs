@@ -1,16 +1,17 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using Foundation;
+using MvvmCross.Core.ViewModels;
 using UIKit;
 
 namespace MBAutoComplete
 {
-	public class DefaultDataSource : MBAutoCompleteViewSource
+	public class DefaultDataSource : MBAutoCompleteViewSource<IMvxNotifyPropertyChanged>
 	{
 		private string _cellIdentifier = "DefaultIdentifier";
-		private ICollection<string> _suggestions;
+		private ICollection<IMvxNotifyPropertyChanged> _suggestions;
 
-		public override void NewSuggestions(ICollection<string> suggestions)
+		public override void NewSuggestions(ICollection<IMvxNotifyPropertyChanged> suggestions)
 		{
 			this._suggestions = suggestions;
 		}
@@ -18,7 +19,7 @@ namespace MBAutoComplete
 		public override UITableViewCell GetCell(UITableView tableView, NSIndexPath indexPath)
 		{
 			UITableViewCell cell = tableView.DequeueReusableCell(_cellIdentifier);
-			string item = _suggestions.ElementAt(indexPath.Row);
+			string item = _suggestions.ElementAt(indexPath.Row).ToString();
 
 			if (cell == null)
 				cell = new UITableViewCell(UITableViewCellStyle.Default, _cellIdentifier);
@@ -28,8 +29,6 @@ namespace MBAutoComplete
 
 			return cell;
 		}
-
-
 
 		public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
 		{

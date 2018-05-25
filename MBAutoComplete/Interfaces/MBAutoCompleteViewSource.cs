@@ -2,17 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Foundation;
+using MvvmCross.Core.ViewModels;
 using UIKit;
 
 
 namespace MBAutoComplete
 {
-	public abstract class MBAutoCompleteViewSource : UITableViewSource
+	public abstract class MBAutoCompleteViewSource<T> : UITableViewSource where T : IMvxNotifyPropertyChanged
 	{
 		public event EventHandler RowSelectedEvent;
-
-		private ICollection<string> _suggestions = new List<string>();
-		public ICollection<string> Suggestions
+		public T SelectedItem;
+        
+		private ICollection<T> _suggestions = new List<T>();
+		public ICollection<T> Suggestions
 		{
 			get
 			{
@@ -25,7 +27,7 @@ namespace MBAutoComplete
 			}
 		}
 
-		public abstract void NewSuggestions(ICollection<string> suggestions);
+		public abstract void NewSuggestions(ICollection<T> suggestions);
 
 		public MBAutoCompleteTextField AutoCompleteTextField
 		{
@@ -42,9 +44,9 @@ namespace MBAutoComplete
 
 		public override void RowSelected(UITableView tableView, NSIndexPath indexPath)
 		{
-			AutoCompleteTextField.Text = Suggestions.ElementAt(indexPath.Row);
+			AutoCompleteTextField.Text = Suggestions.ElementAt(indexPath.Row).ToString();
 			AutoCompleteTextField.AutoCompleteTableView.Hidden = true;
-
+			SelectedItem = Suggestions.ElementAt(indexPath.Row);
 			RowSelectedEvent?.Invoke(this, EventArgs.Empty);
 		}
 	}
